@@ -243,8 +243,100 @@ export default function CoursesPage() {
         </CardContent>
       </Card>
 
-      {/* Courses Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Recommended Courses */}
+      <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Recommended Courses</h2>
+              <p className="text-gray-600">Based on your skills and career goals</p>
+            </div>
+            <Button variant="outline" size="sm">
+              View All Recommendations
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              {
+                title: "System Design Interview Prep",
+                instructor: "Sarah Johnson",
+                rating: 4.9,
+                students: 2100,
+                price: 149,
+                platform: "Coursera",
+                skills: ["System Design", "Architecture", "Scalability"]
+              },
+              {
+                title: "Advanced Python for Data Science",
+                instructor: "Dr. Michael Chen",
+                rating: 4.8,
+                students: 1800,
+                price: 99,
+                platform: "Udemy",
+                skills: ["Python", "Data Science", "Machine Learning"]
+              },
+              {
+                title: "Cloud Security Fundamentals",
+                instructor: "Jennifer Liu",
+                rating: 4.7,
+                students: 1200,
+                price: 199,
+                platform: "AWS Training",
+                skills: ["Cloud Security", "AWS", "DevOps"]
+              }
+            ].map((course, index) => (
+              <Card key={index} className="border border-gray-200 hover:border-blue-300 transition-all duration-200">
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    <div>
+                      <h3 className="font-bold text-gray-900 mb-1">{course.title}</h3>
+                      <p className="text-sm text-gray-600">by {course.instructor}</p>
+                    </div>
+                    
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                        <span className="font-medium">{course.rating}</span>
+                        <span className="text-gray-500">({course.students})</span>
+                      </div>
+                      <span className="font-bold text-blue-600">${course.price}</span>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-1">
+                      {course.skills.slice(0, 2).map((skill, skillIndex) => (
+                        <Badge key={skillIndex} variant="secondary" className="text-xs bg-blue-100 text-blue-800">
+                          {skill}
+                        </Badge>
+                      ))}
+                      {course.skills.length > 2 && (
+                        <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-600">
+                          +{course.skills.length - 2}
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button size="sm" className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white">
+                        <Play className="h-3 w-3 mr-1" />
+                        Enroll
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <ExternalLink className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* My Courses */}
+      <div>
+        <h2 className="text-xl font-bold text-gray-900 mb-6">My Courses</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCourses.map((course) => (
           <Card key={course.id} className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl hover:shadow-xl transition-all duration-300">
             <CardContent className="p-6 flex flex-col h-full">
@@ -404,16 +496,23 @@ export default function CoursesPage() {
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
 
-      {filteredCourses.length === 0 && (
-        <div className="text-center py-12">
-          <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No courses found</h3>
-          <p className="text-gray-600">Try adjusting your search or filter criteria.</p>
+
+
+          
+        ))}
         </div>
-      )}
+
+        
+        
+        {filteredCourses.length === 0 && (
+          <div className="text-center py-12">
+            <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No courses found</h3>
+            <p className="text-gray-600">Try adjusting your search or filter criteria.</p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

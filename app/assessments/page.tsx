@@ -181,27 +181,47 @@ export default function AssessmentsPage() {
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon
-          return (
-            <Card key={index} className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl">
-                    <Icon className="w-6 h-6 text-white" />
+      {/* Top 10 Skills Graph */}
+      <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-gray-900">
+            <Brain className="h-5 w-5 text-blue-600" />
+            Top 10 Skills Assessment Scores
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {assessments
+              .filter(assessment => assessment.completed)
+              .sort((a, b) => b.score - a.score)
+              .slice(0, 10)
+              .map((assessment, index) => (
+                <div key={assessment.id} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-bold text-gray-500">#{index + 1}</span>
+                      <span className="font-medium text-gray-900">{assessment.title}</span>
+                      <Badge className={getDifficultyColor(assessment.difficulty)}>
+                        {assessment.difficulty}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-blue-600">{assessment.score}%</span>
+                      <span className="text-xs text-gray-500">{assessment.dateTaken}</span>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-                    <p className="text-sm text-gray-600">{stat.label}</p>
-                  </div>
+                  <Progress value={assessment.score} className="h-3" />
                 </div>
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
+              ))}
+            {assessments.filter(assessment => assessment.completed).length === 0 && (
+              <div className="text-center py-8">
+                <Brain className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600">Complete some assessments to see your top scores here!</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Search and Filter */}
       <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">

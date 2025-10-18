@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+
 import { Progress } from "@/components/ui/progress"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -12,11 +12,15 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useDashboardService } from "@/lib/dashboard-service"
 import { BookOpen, Users, Play, Target, TrendingUp, MessageCircle } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+
+import { User, Edit, Plus, Award, Brain, BarChart3 } from "lucide-react"
 
 export function LearningPath() {
   const { state, actions } = useDashboardService()
   const [isPlanIDPOpen, setIsPlanIDPOpen] = useState(false)
   const [isSkillGapOpen, setIsSkillGapOpen] = useState(false)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [idpFormData, setIdpFormData] = useState({
     skill: '',
     goal: '',
@@ -31,15 +35,30 @@ export function LearningPath() {
     }
   }
 
-  const handleConnectMentor = (mentorId: string) => {
-    actions.requestMentorship(mentorId)
-  }
+ 
 
   const handlePlanIDP = () => {
     if (idpFormData.skill && idpFormData.goal) {
       alert(`IDP planned for ${idpFormData.skill}: ${idpFormData.goal}`)
       setIdpFormData({ skill: '', goal: '', timeline: '', priority: 'Medium' })
       setIsPlanIDPOpen(false)
+    }
+  }
+    const topAssessmentScore = state.userProfile.quiz_scores_summary.length > 0 
+    ? state.userProfile.quiz_scores_summary.reduce((max, quiz) => quiz.score > max.score ? quiz : max)
+    : null
+
+  // Get top 10 skills for detailed view
+  const top10Skills = state.userProfile.quiz_scores_summary
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 10)
+
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Easy': return 'bg-green-100 text-green-800'
+      case 'Intermediate': return 'bg-yellow-100 text-yellow-800'
+      case 'Advanced': return 'bg-red-100 text-red-800'
+      default: return 'bg-gray-100 text-gray-800'
     }
   }
 
@@ -60,6 +79,83 @@ export function LearningPath() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {topAssessmentScore && (
+          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-lg">
+                  <Award className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">Top Skills Assessment</h3>
+                  <p className="text-sm text-gray-600">Your highest scoring assessment</p>
+                </div>
+              </div>
+              <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="bg-blue-300 border-blue-700"
+                  >
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    View All Scores
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                      <BarChart3 className="h-5 w-5" />
+                      Top 10 Skills Assessment Breakdown
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {top10Skills.map((quiz, index) => (
+                        <div key={quiz.quiz_id} className="bg-gray-50 rounded-lg p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium text-gray-900 text-sm">#{index + 1} {quiz.topic}</span>
+                            
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-600">Score</span>
+                              <span className="font-bold text-blue-600">{quiz.score}%</span>
+                            </div>
+                            <Progress value={quiz.score} className="h-2" />
+                            <div className="text-xs text-gray-500">
+                              Completed: {new Date(quiz.date_taken).toLocaleDateString()}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    {state.userProfile.quiz_scores_summary.length < 10 && (
+                      <div className="text-center py-4 text-gray-500">
+                        Complete more assessments to see your full top 10 scores
+                      </div>
+                    )}
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-gray-900">{topAssessmentScore.topic}</span>
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-green-100 text-green-800">
+                    {topAssessmentScore.difficulty}
+                  </Badge>
+                  <span className="text-lg font-bold text-yellow-600">{topAssessmentScore.score}%</span>
+                </div>
+              </div>
+              <Progress value={topAssessmentScore.score} className="h-2" />
+              <div className="text-xs text-gray-500">
+                Completed: {new Date(topAssessmentScore.date_taken).toLocaleDateString()}
+              </div>
+            </div>
+          </div>
+        )}
         {/* IDP Progress */}
         <div className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl p-6 text-white shadow-lg">
           <div className="flex items-center justify-between mb-4">
@@ -139,7 +235,7 @@ export function LearningPath() {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-white/90">{course.course_name}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-white">50% Complete</span>
+                    <span className="text-sm font-medium text-white">Progress</span>
                     <Button 
                       variant="ghost" 
                       size="sm"
@@ -172,62 +268,7 @@ export function LearningPath() {
         </div>
 
         {/* Mentorship Links */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium text-gray-900">Mentorship Links</h3>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => alert('View all mentors...')}
-            >
-              <Users className="h-4 w-4 mr-2" />
-              View All
-            </Button>
-          </div>
-          <div className="space-y-3">
-            {state.mentors.slice(0, 3).map((mentor, index) => (
-              <div key={mentor.mentor_id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
-                <Avatar className="h-10 w-10 ring-2 ring-blue-200">
-                  <AvatarImage src={mentor.profile_picture} alt={mentor.name} />
-                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-sm">
-                    {mentor.name.split(' ').map(n => n[0]).join('')}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{mentor.name}</p>
-                  <p className="text-xs text-blue-600 truncate">{mentor.expertise[0]}</p>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: 5 }, (_, i) => (
-                      <div
-                        key={i}
-                        className={`w-2 h-2 rounded-full ${
-                          i < Math.floor(mentor.rating) ? 'bg-yellow-400' : 'bg-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => handleConnectMentor(mentor.mentor_id)}
-                    disabled={mentor.availability === 'Closed'}
-                    className="text-xs"
-                  >
-                    {mentor.availability === 'Open' ? 'Connect' : 'Busy'}
-                  </Button>
-                </div>
-              </div>
-            ))}
-            {state.mentors.length === 0 && (
-              <div className="text-center py-4">
-                <Users className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-600 text-sm">No mentors available</p>
-              </div>
-            )}
-          </div>
-        </div>
+        
 
         {/* Quick Actions */}
         <div className="pt-4 border-t border-gray-100">

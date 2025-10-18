@@ -10,7 +10,7 @@ import { LearningPath } from "@/components/learning-path"
 import { SkillsAssessment } from "@/components/skills-assessment"
 import { InteractiveJobMatches } from "@/components/interactive-job-matches"
 // import { InteractiveMentors } from "@/components/interactive-mentors"
-import { InteractiveCourses } from "@/components/interactive-courses"
+// import { InteractiveCourses } from "@/components/interactive-courses"
 import { UpdateProfileModal } from "@/components/update-profile-modal"
 import { useDashboardService } from "@/lib/dashboard-service"
 import { Upload, User, Briefcase, Brain, Users, TrendingUp } from "lucide-react"
@@ -71,7 +71,7 @@ export default function Dashboard() {
                     disabled={state.isUploadingResume}
                   >
                     <Upload className="h-4 w-4 mr-2" />
-                    {state.isUploadingResume ? 'Uploading...' : 'Upload Resume'}
+                    {state.isUploadingResume ? 'Uploading...' : 'Download Resume'}
                   </Button>
                 </div>
                 <UpdateProfileModal />
@@ -101,24 +101,13 @@ export default function Dashboard() {
         {/* Skills Assessment */}
         <SkillsAssessment />
 
-        {/* Courses and Job Matches side-by-side (responsive) */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          <InteractiveCourses 
-            courses={state.courses}
-            selectedCourse={state.selectedCourse}
-            onSelectCourse={actions.selectCourse}
-            onEnrollInCourse={actions.enrollInCourse}
-          />
-          <InteractiveJobMatches 
-            jobMatches={state.jobMatches}
-            selectedJob={state.selectedJob}
-            savedJobs={state.savedJobs}
-            appliedJobs={state.appliedJobs}
-            onSelectJob={actions.selectJob}
-            onApplyToJob={actions.applyToJob}
-            onSaveJob={actions.saveJob}
-          />
-        </div>
+        {/* Courses only */}
+        {/* <InteractiveCourses 
+          courses={state.courses}
+          selectedCourse={state.selectedCourse}
+          onSelectCourse={actions.selectCourse}
+          onEnrollInCourse={actions.enrollInCourse}
+        /> */}
       </div>
     </div>
   )

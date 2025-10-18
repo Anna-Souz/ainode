@@ -8,30 +8,30 @@ export interface UserProfile {
   phone: string
   profile_picture: string
   account_status: 'Active' | 'Inactive' | 'Suspended'
-  
+
   // Academic Background
   education: Education[]
   specialization: string
   graduation_year: number
-  
+
   // Career Preferences
   preferred_job_roles: string[]
   preferred_location: string[]
   job_type_preference: 'Full-time' | 'Part-time' | 'Internship' | 'Remote'
   career_goal: string
-  
+
   // Achievements & Experience
   work_experience: WorkExperience[]
   certifications: Certification[]
   projects: Project[]
   awards: Award[]
-  
+
   // Engagement & Activity
   last_login: string
   quiz_scores_summary: QuizScore[]
   job_matches_summary: JobMatch[]
   mentor_connections: number
-  
+
   // Settings & Preferences
   language_preference: string
   notification_preferences: NotificationSettings
@@ -214,7 +214,7 @@ export const sampleUserProfile: UserProfile = {
   phone: "+1 (555) 123-4567",
   profile_picture: "/professional-headshot.png",
   account_status: "Active",
-  
+
   education: [
     {
       degree: "Bachelor of Computer Science",
@@ -225,12 +225,12 @@ export const sampleUserProfile: UserProfile = {
   ],
   specialization: "Software Engineering",
   graduation_year: 2022,
-  
+
   preferred_job_roles: ["Software Engineer", "Full Stack Developer", "ML Engineer"],
   preferred_location: ["San Francisco", "Remote"],
   job_type_preference: "Full-time",
   career_goal: "Become a Senior Software Engineer at a top tech company",
-  
+
   work_experience: [
     {
       company: "Tech Corp",
@@ -267,7 +267,7 @@ export const sampleUserProfile: UserProfile = {
       description: "Won first place in university hackathon"
     }
   ],
-  
+
   last_login: "2024-01-15T10:30:00Z",
   quiz_scores_summary: [
     {
@@ -275,6 +275,69 @@ export const sampleUserProfile: UserProfile = {
       topic: "Python Programming",
       score: 92,
       date_taken: "2024-01-10",
+      difficulty: "Advanced"
+    },
+    {
+      quiz_id: "quiz_002",
+      topic: "Machine Learning",
+      score: 88,
+      date_taken: "2024-01-12",
+      difficulty: "Advanced"
+    },
+    {
+      quiz_id: "quiz_003",
+      topic: "Data Structures & Algorithms",
+      score: 95,
+      date_taken: "2024-01-08",
+      difficulty: "Advanced"
+    },
+    {
+      quiz_id: "quiz_004",
+      topic: "System Design",
+      score: 78,
+      date_taken: "2024-01-15",
+      difficulty: "Advanced"
+    },
+    {
+      quiz_id: "quiz_005",
+      topic: "Cloud Computing",
+      score: 85,
+      date_taken: "2024-01-14",
+      difficulty: "Intermediate"
+    },
+    {
+      quiz_id: "quiz_006",
+      topic: "React Development",
+      score: 90,
+      date_taken: "2024-01-11",
+      difficulty: "Intermediate"
+    },
+    {
+      quiz_id: "quiz_007",
+      topic: "Node.js Backend",
+      score: 82,
+      date_taken: "2024-01-13",
+      difficulty: "Intermediate"
+    },
+    {
+      quiz_id: "quiz_008",
+      topic: "SQL Database",
+      score: 87,
+      date_taken: "2024-01-09",
+      difficulty: "Intermediate"
+    },
+    {
+      quiz_id: "quiz_009",
+      topic: "Docker & Kubernetes",
+      score: 75,
+      date_taken: "2024-01-16",
+      difficulty: "Advanced"
+    },
+    {
+      quiz_id: "quiz_010",
+      topic: "DevOps Practices",
+      score: 80,
+      date_taken: "2024-01-17",
       difficulty: "Advanced"
     }
   ],
@@ -286,7 +349,7 @@ export const sampleUserProfile: UserProfile = {
     }
   ],
   mentor_connections: 3,
-  
+
   language_preference: "English",
   notification_preferences: {
     job_alerts: true,
@@ -407,6 +470,34 @@ export const sampleCourses: Course[] = [
     rating: 4.6,
     completion_rate: 82,
     price: 49,
+    free: false
+  },
+  {
+    course_id: "course_003",
+    course_name: "Python Programming Masterclass",
+    skill_targeted: ["Python", "Programming", "Data Structures"],
+    platform: "Udemy",
+    link: "https://udemy.com/python-masterclass",
+    mentor_reference: "mentor_001",
+    duration: "12 weeks",
+    difficulty: "Intermediate",
+    rating: 4.7,
+    completion_rate: 45,
+    price: 89,
+    free: false
+  },
+  {
+    course_id: "course_004",
+    course_name: "Machine Learning Fundamentals",
+    skill_targeted: ["Machine Learning", "Python", "Statistics"],
+    platform: "Coursera",
+    link: "https://coursera.org/learn/machine-learning",
+    mentor_reference: "mentor_001",
+    duration: "10 weeks",
+    difficulty: "Advanced",
+    rating: 4.9,
+    completion_rate: 30,
+    price: 99,
     free: false
   }
 ]

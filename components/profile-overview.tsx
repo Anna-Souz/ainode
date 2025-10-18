@@ -7,14 +7,17 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useDashboardService } from "@/lib/dashboard-service"
-import { User, Edit, Plus } from "lucide-react"
+import { User, Edit, Plus, Award, Brain, BarChart3 } from "lucide-react"
+import { BookOpen, Users, Play, Target, TrendingUp, MessageCircle } from "lucide-react"
 
 export function ProfileOverview() {
   const { state, actions } = useDashboardService()
   const [isAddSkillOpen, setIsAddSkillOpen] = useState(false)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [newSkillName, setNewSkillName] = useState("")
   const [newSkillLevel, setNewSkillLevel] = useState<'Beginner' | 'Intermediate' | 'Advanced'>('Beginner')
 
@@ -23,6 +26,9 @@ export function ProfileOverview() {
     if (newLevel && !isNaN(Number(newLevel)) && Number(newLevel) >= 0 && Number(newLevel) <= 100) {
       actions.updateSkillLevel(skillName, Number(newLevel))
     }
+  }
+   const handleConnectMentor = (mentorId: string) => {
+    actions.requestMentorship(mentorId)
   }
 
   const handleAddSkill = () => {
@@ -38,6 +44,9 @@ export function ProfileOverview() {
   const handleViewAllSkills = () => {
     alert(`Viewing all ${state.skills.length} skills...`)
   }
+
+  // Get top skills assessment score
+
 
   return (
     <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 rounded-2xl">
@@ -55,6 +64,9 @@ export function ProfileOverview() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* Top Skills Assessment Score */}
+        
+
         {/* Skill Summary */}
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -144,6 +156,67 @@ export function ProfileOverview() {
             )}
           </div>
         </div>
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-medium text-gray-900">Mentorship Links</h3>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => alert('View all mentors...')}
+            >
+              <Users className="h-4 w-4 mr-2" />
+              View All
+            </Button>
+          </div>
+          <div className="space-y-3">
+            {state.mentors.slice(0, 3).map((mentor, index) => (
+              <div key={mentor.mentor_id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                <Avatar className="h-10 w-10 ring-2 ring-blue-200">
+                  <AvatarImage src={mentor.profile_picture} alt={mentor.name} />
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-sm">
+                    {mentor.name.split(' ').map(n => n[0]).join('')}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">{mentor.name}</p>
+                  <p className="text-xs text-blue-600 truncate">{mentor.expertise[0]}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: 5 }, (_, i) => (
+                        <div
+                          key={i}
+                          className={`w-2 h-2 rounded-full ${
+                            i < Math.floor(mentor.rating) ? 'bg-yellow-400' : 'bg-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs font-medium text-gray-600">{mentor.rating}</span>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => handleConnectMentor(mentor.mentor_id)}
+                    disabled={mentor.availability === 'Closed'}
+                    className="text-xs"
+                  >
+                    {mentor.availability === 'Open' ? 'Connect' : 'Busy'}
+                  </Button>
+                </div>
+              </div>
+            ))}
+            {state.mentors.length === 0 && (
+              <div className="text-center py-4">
+                <Users className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-600 text-sm">No mentors available</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        
       </CardContent>
     </Card>
   )
