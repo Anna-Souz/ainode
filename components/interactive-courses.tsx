@@ -101,7 +101,7 @@ export function InteractiveCourses({
 
                   <div className="flex flex-wrap gap-2 mb-4">
                     {course.skill_targeted.slice(0, 3).map((skill, index) => (
-                      <Badge key={index} variant="secondary" className="bg-purple-100 text-purple-800">
+                      <Badge key={index} variant="secondary" className="bg-purple-100 text-blue-800">
                         {skill}
                       </Badge>
                     ))}
@@ -222,7 +222,7 @@ export function InteractiveCourses({
                   <Button 
                     size="sm"
                     onClick={() => onEnrollInCourse(course.course_id)}
-                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                    className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-400 text-white"
                   >
                     <Play className="h-4 w-4 mr-2" />
                     {course.free ? 'Start' : 'Enroll'}
