@@ -25,11 +25,6 @@ export default function Dashboard() {
     }
   }
 
-  const overallScore = Math.round(
-    state.userProfile.quiz_scores_summary.reduce((sum, quiz) => sum + quiz.score, 0) / 
-    state.userProfile.quiz_scores_summary.length || 0
-  )
-
   return (
     <div className="min-h-screen ainode-gradient">
       <div className="space-y-6 p-6">

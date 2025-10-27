@@ -14,13 +14,24 @@ import { useDashboardService } from "@/lib/dashboard-service"
 import { BookOpen, Users, Play, Target, TrendingUp, MessageCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
-import { User, Edit, Plus, Award, Brain, BarChart3 } from "lucide-react"
+import { User, Edit, Plus, Award, Brain, BarChart3, Trash2, Minus } from "lucide-react"
 
 export function LearningPath() {
   const { state, actions } = useDashboardService()
   const [isPlanIDPOpen, setIsPlanIDPOpen] = useState(false)
   const [isSkillGapOpen, setIsSkillGapOpen] = useState(false)
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [scoreToggle, setScoreToggle] = useState<'latest' | 'top'>('latest')
+  const [skillGaps, setSkillGaps] = useState([
+    { id: '1', name: 'System Design', priority: 'High' },
+    { id: '2', name: 'Kubernetes', priority: 'Medium' },
+    { id: '3', name: 'AWS Cloud', priority: 'High' }
+  ])
+  const [courseRecommendations, setCourseRecommendations] = useState([
+    { id: '1', name: 'Advanced Algorithms', progress: 30 },
+    { id: '2', name: 'Cloud Architecture', progress: 15 },
+    { id: '3', name: 'Microservices', progress: 0 }
+  ])
   const [idpFormData, setIdpFormData] = useState({
     skill: '',
     goal: '',
@@ -44,14 +55,44 @@ export function LearningPath() {
       setIsPlanIDPOpen(false)
     }
   }
-    const topAssessmentScore = state.userProfile.quiz_scores_summary.length > 0 
-    ? state.userProfile.quiz_scores_summary.reduce((max, quiz) => quiz.score > max.score ? quiz : max)
-    : null
 
-  // Get top 10 skills for detailed view
-  const top10Skills = state.userProfile.quiz_scores_summary
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 10)
+  // Get latest or top skills assessment score
+  const getAssessmentScore = () => {
+    if (state.userProfile.quiz_scores_summary.length === 0) return null
+    
+    if (scoreToggle === 'latest') {
+      // Get latest score
+      return state.userProfile.quiz_scores_summary
+        .sort((a, b) => new Date(b.date_taken).getTime() - new Date(a.date_taken).getTime())[0]
+    } else {
+      // Get top score
+      return state.userProfile.quiz_scores_summary.reduce((max, quiz) => quiz.score > max.score ? quiz : max)
+    }
+  }
+
+  const assessmentScore = getAssessmentScore()
+
+  const handleAddSkillGap = () => {
+    const skill = prompt('Enter skill to add:')
+    if (skill) {
+      setSkillGaps([...skillGaps, { id: Date.now().toString(), name: skill, priority: 'Medium' }])
+    }
+  }
+
+  const handleDeleteSkillGap = (id: string) => {
+    setSkillGaps(skillGaps.filter(gap => gap.id !== id))
+  }
+
+  const handleAddCourse = () => {
+    const course = prompt('Enter course name:')
+    if (course) {
+      setCourseRecommendations([...courseRecommendations, { id: Date.now().toString(), name: course, progress: 0 }])
+    }
+  }
+
+  const handleDeleteCourse = (id: string) => {
+    setCourseRecommendations(courseRecommendations.filter(course => course.id !== id))
+  }
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -79,7 +120,7 @@ export function LearningPath() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {topAssessmentScore && (
+        {assessmentScore && (
           <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
@@ -87,77 +128,42 @@ export function LearningPath() {
                   <Award className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-900">Top Skills Assessment</h3>
-                  <p className="text-sm text-gray-600">Your highest scoring assessment</p>
+                  <h3 className="font-bold text-gray-900">
+                    {scoreToggle === 'latest' ? 'Latest Skills Assessment' : 'Top Skills Assessment'}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {scoreToggle === 'latest' ? 'Your most recent assessment' : 'Your highest scoring assessment'}
+                  </p>
                 </div>
               </div>
-              <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
-                <DialogTrigger asChild>
                   <Button 
                     variant="outline" 
                     size="sm"
+                onClick={() => setScoreToggle(scoreToggle === 'latest' ? 'top' : 'latest')}
                     className="bg-blue-300 border-blue-700"
                   >
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    View All Scores
+                {scoreToggle === 'latest' ? 'Show Top Score' : 'Show Latest'}
                   </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                      <BarChart3 className="h-5 w-5" />
-                      Top 10 Skills Assessment Breakdown
-                    </DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {top10Skills.map((quiz, index) => (
-                        <div key={quiz.quiz_id} className="bg-gray-50 rounded-lg p-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-medium text-gray-900 text-sm">#{index + 1} {quiz.topic}</span>
-                            
-                          </div>
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-gray-600">Score</span>
-                              <span className="font-bold text-blue-600">{quiz.score}%</span>
-                            </div>
-                            <Progress value={quiz.score} className="h-2" />
-                            <div className="text-xs text-gray-500">
-                              Completed: {new Date(quiz.date_taken).toLocaleDateString()}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    {state.userProfile.quiz_scores_summary.length < 10 && (
-                      <div className="text-center py-4 text-gray-500">
-                        Complete more assessments to see your full top 10 scores
-                      </div>
-                    )}
-                  </div>
-                </DialogContent>
-              </Dialog>
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="font-medium text-gray-900">{topAssessmentScore.topic}</span>
+                <span className="font-medium text-gray-900">{assessmentScore.topic}</span>
                 <div className="flex items-center gap-2">
                   <Badge className="bg-green-100 text-green-800">
-                    {topAssessmentScore.difficulty}
+                    {assessmentScore.difficulty}
                   </Badge>
-                  <span className="text-lg font-bold text-yellow-600">{topAssessmentScore.score}%</span>
+                  <span className="text-lg font-bold text-yellow-600">{assessmentScore.score}%</span>
                 </div>
               </div>
-              <Progress value={topAssessmentScore.score} className="h-2" />
+              <Progress value={assessmentScore.score} className="h-2" />
               <div className="text-xs text-gray-500">
-                Completed: {new Date(topAssessmentScore.date_taken).toLocaleDateString()}
+                Completed: {new Date(assessmentScore.date_taken).toLocaleDateString()}
               </div>
             </div>
           </div>
         )}
         {/* IDP Progress */}
-        <div className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl p-6 text-white shadow-lg">
+        {/* <div className="bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl p-6 text-white shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-white">IDP Progress</h3>
             <Dialog open={isPlanIDPOpen} onOpenChange={setIsPlanIDPOpen}>
@@ -265,77 +271,96 @@ export function LearningPath() {
               </div>
             )}
           </div>
-        </div>
+        </div> */}
 
-        {/* Mentorship Links */}
-        
-
-        {/* Quick Actions */}
+        {/* Skill Gaps */}
         <div className="pt-4 border-t border-gray-100">
-          <div className="grid grid-cols-2 gap-2">
-            <Dialog open={isSkillGapOpen} onOpenChange={setIsSkillGapOpen}>
-              <DialogTrigger asChild>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-medium text-gray-900 flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-orange-600" />
+              Skill Gaps
+            </h3>
                 <Button 
                   variant="outline" 
                   size="sm"
+              onClick={handleAddSkillGap}
                 >
-                  <TrendingUp className="h-4 w-4 mr-2" />
-                  Skill Gap
+              <Plus className="h-4 w-4 mr-1" />
+              Add Skill
                 </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Skill Gap Analysis</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div className="bg-blue-50 p-4 rounded-xl">
-                    <h3 className="font-semibold text-blue-900 mb-2">Your Current Skills</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {state.skills.map((skill, index) => (
-                        <div key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                          {skill.name} ({skill.level})
                         </div>
-                      ))}
+          <div className="space-y-2">
+            {skillGaps.map((gap) => (
+              <div key={gap.id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                <div className="flex items-center gap-3">
+                  <Badge className={`${
+                    gap.priority === 'High' ? 'bg-red-600 text-white' : 
+                    gap.priority === 'Medium' ? 'bg-yellow-600 text-white' : 
+                    'bg-blue-600 text-white'
+                  }`}>
+                    {gap.priority}
+                  </Badge>
+                  <span className="text-sm font-medium text-gray-900">{gap.name}</span>
                     </div>
-                  </div>
-                  
-                  <div className="bg-red-50 p-4 rounded-xl">
-                    <h3 className="font-semibold text-red-900 mb-2">Skills to Develop</h3>
-                    <div className="space-y-2">
-                      {state.jobMatches.flatMap(job => job.skill_gap).filter((skill, index, arr) => arr.indexOf(skill) === index).slice(0, 5).map((skill, index) => (
-                        <div key={index} className="flex items-center justify-between bg-red-100 text-red-800 px-3 py-2 rounded-lg">
-                          <span>{skill}</span>
-                          <Button size="sm" variant="outline" className="text-red-700 border-red-300">
-                            Learn
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => handleDeleteSkillGap(gap.id)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       ))}
+            {skillGaps.length === 0 && (
+              <div className="text-center py-4 text-gray-500 text-sm">
+                No skill gaps identified
+                    </div>
+            )}
                     </div>
                   </div>
 
-                  <div className="bg-green-50 p-4 rounded-xl">
-                    <h3 className="font-semibold text-green-900 mb-2">Recommendations</h3>
-                    <ul className="space-y-1 text-sm text-green-800">
-                      <li>• Focus on System Design and Kubernetes for better job matches</li>
-                      <li>• Complete Advanced Algorithms course to improve coding skills</li>
-                      <li>• Consider mentorship for cloud architecture guidance</li>
-                    </ul>
-                  </div>
-
-                  <Button className="w-full" onClick={() => setIsSkillGapOpen(false)}>
-                    Close Analysis
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+        {/* Course Recommendations */}
+        <div className="pt-4 border-t border-gray-100">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-medium text-gray-900 flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-blue-600" />
+              Course Recommendations & Progress
+            </h3>
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => alert('Opening learning recommendations...')}
+              onClick={handleAddCourse}
             >
-              <Target className="h-4 w-4 mr-2" />
-              Recommendations
+              <Plus className="h-4 w-4 mr-1" />
+              Add Course
             </Button>
+          </div>
+          <div className="space-y-3">
+            {courseRecommendations.map((course) => (
+              <div key={course.id} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-900">{course.name}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-blue-600">{course.progress}%</span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleDeleteCourse(course.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+            </Button>
+                  </div>
+                </div>
+                <Progress value={course.progress} className="h-2" />
+              </div>
+            ))}
+            {courseRecommendations.length === 0 && (
+              <div className="text-center py-4 text-gray-500 text-sm">
+                No recommended courses
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
